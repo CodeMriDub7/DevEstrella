@@ -100,19 +100,17 @@
         <p>&copy; 2024 Bill-E. All rights reserved.</p>
     </footer>
     <script>
+        let cart = [];
         function addToCart() {
             // Logic to add product to cart
             alert("Product added to cart!");
+            cart.push("Product-Code"); // Example product added to cart
         }
 
         function removeFromCart() {
             // Logic to remove product from cart
             alert("Product removed from cart!");
-        }
-
-        function showCart() {
-            // Logic to display cart contents
-            alert("Displaying cart contents!");
+            cart.pop(); // Example product removed from cart    
         }
 
         function proceedToCheckout() {
