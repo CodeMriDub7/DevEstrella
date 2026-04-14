@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dustomer View</title>
+    <style>
+        *{margin: 0;
+        padding: 0;}
+        header{
+            background-color: yellow;
+            display: flex;
+
+        }
+        nav{
+            display: flex;
+            gap: 20px;
+        }
+        .inactive{
+            color: gray;
+            text-decoration: none;
+        }
+        .active{
+            color: black;
+            text-decoration: none;
+        }
+        #QR{
+            background-color: lightgray;
+            margin: 20px;
+            padding: 20px;
+        }
+        #cart{
+            background-color: rgb(14, 121, 157);
+            margin: 20px;
+            padding: 20px;
+        }
+        #checkout{
+            background-color: lightgreen;
+            margin: 20px;
+            padding: 20px;
+        }
+        .hidden{
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <logo>
+            <h1>Bill - E</h1>
+        </logo>
+        <nav>
+                <a href="#" class="inactive">Terms</a>
+                <a href="#" class="inactive">About Us</a>
+                <a href="#" class="inactive">Developer </a>
+        </nav>
+    </header>
+    <main>
+        <section id="QR">
+            <!-- QR Code Scanner section  -->
+            <!--   Manual Entry Unitll QR code is implemented-->
+            <div>
+                <form>
+                    <label for="product-code">Enter Product Code:</label>
+                    <input type="text" id="product-code" name="product-code" required>
+                    <button onclick="addToCart()">Add to Cart</button>
+                </form>
+            </div>
+        </section>
+        <section id="cart">
+            <!-- Cart Section -->
+            <div>
+                <h2>Your Cart</h2>
+                <div class="product-card">
+                    <h3>Product Name</h3>
+                    <p>Price: $XX.XX</p>
+                    <button onclick="removeFromCart()">Remove</button>
+                </div>
+            </div>
+        </section>
+        <section id="checkout">
+            <!-- Primary Buttons-->
+            <div>
+                <button onclick="proceedToCheckout()">Proceed to Checkout</button>
+            </div> 
+        </section>
+        <section class="hidden">
+            <!-- Bill-->
+            <div>
+                <h2>Bill Summary</h2>
+                <p class="added-item"></p>
+                <p class="Added-item-description"></p>
+                <p>Total: $XX.XX</p>
+                <button onclick="confirmPayment()">Confirm Payment</button>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Bill-E. All rights reserved.</p>
+    </footer>
+    <script>
+        function addToCart() {
+            // Logic to add product to cart
+            alert("Product added to cart!");
+        }
+
+        function removeFromCart() {
+            // Logic to remove product from cart
+            alert("Product removed from cart!");
+        }
+
+        function showCart() {
+            // Logic to display cart contents
+            alert("Displaying cart contents!");
+        }
+
+        function proceedToCheckout() {
+            // Logic to proceed to checkout
+            alert("Proceeding to checkout!");
+        }
+
+        function confirmPayment() {
+            // Logic to confirm payment
+            alert("Payment confirmed!");
+        }
+    </script>
+</body>
+</html>
