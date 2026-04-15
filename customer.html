@@ -101,10 +101,17 @@
     </footer>
     <script>
         let cart = [];
+        let itemsCount = 0;
         function addToCart() {
             // Logic to add product to cart
             alert("Product added to cart!");
-            cart.push("Product-Code"); // Example product added to cart
+            let item = document.getElementById("product-code").value;
+            cart.push(item); // Example product added to cart
+            itemsCount++; // Example product added to cart
+            searchProduct(item);
+        }
+        function cartDisplay(){
+
         }
 
         function removeFromCart() {
@@ -121,6 +128,19 @@
         function confirmPayment() {
             // Logic to confirm payment
             alert("Payment confirmed!");
+        }
+        searchProduct = (item) => {
+            // Example product search logic
+            const products = {
+                "123": { name: "Product 1", price: 10.00 },
+                "456": { name: "Product 2", price: 20.00 },
+                "789": { name: "Product 3", price: 30.00 }
+            };
+            if (products[item]) {
+                alert(`Added ${products[item].name} to cart for $${products[item].price}`);
+            } else {
+                console.log("Product not found in the database.");
+            }
         }
     </script>
 </body>
