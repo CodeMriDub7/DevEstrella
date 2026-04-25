@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In-Store Shopping & Scanner</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #1e293b;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #38bdf8;
+            letter-spacing: 0.5px;
+        }
+
+        nav {
+            background-color: #1e293b;
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        nav a {
+            color: #f43f5e;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 1rem;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 850px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: #1e293b;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #e2e8f0;
+            font-size: 1.25rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        #reader {
+            width: 100%;
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 2px solid #334155;
+            background-color: #0f172a;
+        }
+
+        /* Override html5-qrcode styles */
+        #reader button {
+            background-color: #0ea5e9 !important;
+            color: white !important;
+            border: none !important;
+            padding: 0.75rem 1.5rem !important;
+            border-radius: 0.5rem !important;
+            cursor: pointer !important;
+            font-weight: 600 !important;
+            transition: background-color 0.2s !important;
+            margin: 10px 0 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        #reader button:hover {
+            background-color: #0284c7 !important;
+        }
+
+        #reader select {
+            padding: 0.5rem !important;
+            border-radius: 0.5rem !important;
+            border: 1px solid #334155 !important;
+            background-color: #1e293b !important;
+            color: white !important;
+            margin-bottom: 10px !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        #reader a {
+            color: #38bdf8 !important;
+            text-decoration: none !important;
+        }
+
+        #scan-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feedback-success {
+            background-color: rgba(52, 211, 153, 0.2);
+            color: #34d399;
+            border: 1px solid #34d399;
+        }
+
+        .feedback-error {
+            background-color: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+            border: 1px solid #f87171;
+        }
+
+        /* Cart Styles */
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #0f172a;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #334155;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #f8fafc;
+        }
+
+        .item-price {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .qty-btn {
+            background-color: #334155;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .qty-btn:hover {
+            background-color: #475569;
+        }
+
+        .qty-display {
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .remove-btn {
+            background-color: transparent;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .remove-btn:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .cart-total-section {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .checkout-btn {
+            background-color: #34d399;
+            color: #022c22;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+
+        .checkout-btn:hover {
+            background-color: #10b981;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #64748b;
+            padding: 2rem 0;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #1e293b;
+            color: #64748b;
+            font-size: 0.875rem;
+            border-top: 1px solid #334155;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Smart Cart</h1>
+    </header>
+
+    <nav>
+        <a href="adminPanel.html">Manage Database (Admin) →</a>
+    </nav>
+
+    <main>
+        <!-- Scanner Section -->
+        <section class="panel">
+            <h2>Scan Product</h2>
+            <div id="reader"></div>
+            <div id="scan-feedback">Scan feedback will appear here</div>
+        </section>
+
+        <!-- Cart Section -->
+        <section class="panel">
+            <h2>Your Cart</h2>
+            <div id="cart-items-container" style="flex: 1; overflow-y: auto; max-height: 400px; padding-right: 5px;">
+                <!-- Cart items injected here -->
+            </div>
+            
+            <div class="cart-total-section">
+                <span>Total:</span>
+                <span id="cart-total">$0.00</span>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 DevEstrella</p>
+    </footer>
+
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script>
+        // Database & Cart Keys
+        const DB_KEY = 'store_products';
+        const CART_KEY = 'user_cart';
+
+        // Load Products Database
+        function getProducts() {
+            const products = localStorage.getItem(DB_KEY);
+            return products ? JSON.parse(products) : [];
+        }
+
+        // Load/Save Cart
+        function getCart() {
+            const cart = localStorage.getItem(CART_KEY);
+            return cart ? JSON.parse(cart) : [];
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+            renderCart();
+        }
+
+        // Add item to cart
+        function addToCart(product) {
+            const cart = getCart();
+            const existingItem = cart.find(item => item.id === product.id);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    ...product,
+                    quantity: 1
+                });
+            }
+            saveCart(cart);
+        }
+
+        // Update item quantity
+        function updateQuantity(id, delta) {
+            let cart = getCart();
+            const item = cart.find(i => i.id === id);
+            
+            if (item) {
+                item.quantity += delta;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+                saveCart(cart);
+            }
+        }
+
+        // Remove item from cart
+        function removeItem(id) {
+            let cart = getCart();
+            cart = cart.filter(i => i.id !== id);
+            saveCart(cart);
+        }
+
+        // Clear cart
+        function checkout() {
+            const cart = getCart();
+            if(cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            alert("Checkout successful! Thank you for shopping.");
+            localStorage.setItem(CART_KEY, JSON.stringify([]));
+            renderCart();
+        }
+
+        // Render Cart UI
+        function renderCart() {
+            const cart = getCart();
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total');
+            
+            container.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="empty-cart">Your cart is currently empty. Scan a product to start shopping.</div>';
+            } else {
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'cart-item';
+                    itemDiv.innerHTML = `
+                        <div class="item-details">
+                            <span class="item-name">${item.name}</span>
+                            <span class="item-price">$${parseFloat(item.price).toFixed(2)} each</span>
+                        </div>
+                        <div class="item-controls">
+                            <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                            <span class="qty-display">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                            <button class="remove-btn" onclick="removeItem('${item.id}')">Remove</button>
+                        </div>
+                    `;
+                    container.appendChild(itemDiv);
+                });
+            }
+
+            totalEl.innerText = `$${total.toFixed(2)}`;
+        }
+
+        // Scanner Logic
+        let lastScannedCode = null;
+        let lastScanTime = 0;
+        let feedbackTimeout;
+
+        function showFeedback(message, type) {
+            const feedbackEl = document.getElementById('scan-feedback');
+            feedbackEl.innerText = message;
+            feedbackEl.className = type === 'success' ? 'feedback-success' : 'feedback-error';
+            feedbackEl.style.opacity = 1;
+
+            clearTimeout(feedbackTimeout);
+            feedbackTimeout = setTimeout(() => {
+                feedbackEl.style.opacity = 0;
+            }, 3000);
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            const now = Date.now();
+            // Prevent double scans within 2 seconds for the same item
+            if (decodedText === lastScannedCode && (now - lastScanTime) < 2000) {
+                return; 
+            }
+
+            lastScannedCode = decodedText;
+            lastScanTime = now;
+
+            const products = getProducts();
+            const product = products.find(p => p.id === decodedText);
+
+            if (product) {
+                addToCart(product);
+                showFeedback(`Added ${product.name} to cart!`, 'success');
+                // Vibrate if supported
+                if (navigator.vibrate) navigator.vibrate(200);
+            } else {
+                showFeedback(`Product ID '${decodedText}' not found in database.`, 'error');
+            }
+        }
+
+        function onScanFailure(error) {
+            // Usually ignored
+        }
+
+        // Initialize Scanner & Cart
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader",
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            /* verbose= */ false);
+            
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        renderCart();
+    </script>
+</body>
+
+</html>
