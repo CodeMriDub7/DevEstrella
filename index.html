@@ -435,6 +435,8 @@
                 </tbody>
             </table>
 
+            <div id="invoice-qrcode" style="display: flex; justify-content: center; margin: 1.5rem 0;"></div>
+
             <div class="invoice-summary">
                 <p>Subtotal: <span id="invoiceSubtotal">$0.00</span></p>
                 <p>GST (18%): <span id="invoiceTax">$0.00</span></p>
@@ -452,6 +454,7 @@
         <p>&copy; 2026 DevEstrella</p>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
@@ -530,7 +533,7 @@
         }
 
         // Generate and show invoice
-        function generateInvoice(cart, subtotal) {
+        function generateInvoice(cart, subtotal, secureToken) {
             const billNo = Math.floor(100 + Math.random() * 900);
             const date = new Date().toLocaleDateString();
             
@@ -557,6 +560,20 @@
             document.getElementById('invoiceTax').innerText = `$${gst.toFixed(2)}`;
             document.getElementById('invoiceTotal').innerText = `$${finalTotal.toFixed(2)}`;
             
+            // Draw QR Code
+            const qrContainer = document.getElementById('invoice-qrcode');
+            qrContainer.innerHTML = ''; // Clear previous
+            if (secureToken) {
+                new QRCode(qrContainer, {
+                    text: secureToken,
+                    width: 128,
+                    height: 128,
+                    colorDark : "#0f172a",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            }
+
             document.getElementById('invoiceModal').style.display = 'flex';
         }
 
@@ -591,10 +608,25 @@
                     // 1. Remove sold items from Supabase
                     await removeSoldItems(cart);
                     
-                    // 2. Generate Invoice
-                    generateInvoice(cart, totalAmount);
-                    
-                    // 3. Clear local cart
+                    // 2. Register bill with local Node.js server to get Secure Token
+                    try {
+                        const res = await fetch('http://localhost:3000/api/bills', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ items: cart })
+                        });
+                        const data = await res.json();
+                        
+                        // 3. Generate Invoice with QR Code
+                        generateInvoice(cart, totalAmount, data.secureToken);
+                        
+                    } catch (err) {
+                        console.error("Failed to register bill with guard server:", err);
+                        alert("Payment succeeded, but could not register bill with security server.");
+                        generateInvoice(cart, totalAmount, null);
+                    }
+
+                    // 4. Clear local cart
                     localStorage.setItem(CART_KEY, JSON.stringify([]));
                     renderCart();
                 },
