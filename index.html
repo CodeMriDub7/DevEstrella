@@ -290,6 +290,15 @@
             <h2>Scan Product</h2>
             <div id="reader"></div>
             <div id="scan-feedback">Scan feedback will appear here</div>
+            
+            <!-- Developer Testing Option -->
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #334155;">
+                <h3 style="font-size: 1rem; color: #94a3b8; margin-top: 0; margin-bottom: 0.5rem;">Developer Testing</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="devTestId" placeholder="Enter Product ID to simulate..." style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white; font-family: 'Inter', sans-serif;">
+                    <button onclick="simulateScan()" style="background: #38bdf8; color: #0f172a; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; font-family: 'Inter', sans-serif; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#0284c7'" onmouseout="this.style.backgroundColor='#38bdf8'">Simulate</button>
+                </div>
+            </div>
         </section>
 
         <!-- Cart Section -->
@@ -317,11 +326,9 @@
         const DB_KEY = 'store_products';
         const CART_KEY = 'user_cart';
 
-        // Load Products Database
-        function getProducts() {
-            const products = localStorage.getItem(DB_KEY);
-            return products ? JSON.parse(products) : [];
-        }
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://rfbcubnahrqfqnvyucmc.supabase.co/rest/v1/products';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmYmN1Ym5haHJxZnFudnl1Y21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjA3OTQsImV4cCI6MjA5MjY5Njc5NH0.lYvmXAre6h46JEI6tuaASeJOaQCFRKKbkEFOoycCNzU';
 
         // Load/Save Cart
         function getCart() {
@@ -437,7 +444,7 @@
             }, 3000);
         }
 
-        function onScanSuccess(decodedText, decodedResult) {
+        async function onScanSuccess(decodedText, decodedResult) {
             const now = Date.now();
             // Prevent double scans within 2 seconds for the same item
             if (decodedText === lastScannedCode && (now - lastScanTime) < 2000) {
@@ -447,16 +454,33 @@
             lastScannedCode = decodedText;
             lastScanTime = now;
 
-            const products = getProducts();
-            const product = products.find(p => p.id === decodedText);
+            showFeedback(`Looking up...`, 'success');
 
-            if (product) {
-                addToCart(product);
-                showFeedback(`Added ${product.name} to cart!`, 'success');
-                // Vibrate if supported
-                if (navigator.vibrate) navigator.vibrate(200);
-            } else {
-                showFeedback(`Product ID '${decodedText}' not found in database.`, 'error');
+            try {
+                // Query Supabase for the specific Product ID
+                const response = await fetch(`${SUPABASE_URL}?id=eq.${decodedText}&select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                
+                // Supabase returns an array for select queries. If empty, product isn't found.
+                if (data && data.length > 0) {
+                    const product = data[0];
+                    addToCart(product);
+                    showFeedback(`Added ${product.name} to cart!`, 'success');
+                    if (navigator.vibrate) navigator.vibrate(200);
+                } else {
+                    showFeedback(`Product ID '${decodedText}' not found.`, 'error');
+                }
+            } catch (err) {
+                console.error("Error fetching product:", err);
+                showFeedback(`Error connecting to database.`, 'error');
             }
         }
 
@@ -476,6 +500,21 @@
 
         html5QrcodeScanner.render(onScanSuccess, onScanFailure);
         renderCart();
+
+        // Developer Test Function
+        function simulateScan() {
+            const input = document.getElementById('devTestId');
+            const testId = input.value.trim();
+            if (testId) {
+                // Clear the debounce variables so we can test the same ID repeatedly without waiting
+                lastScannedCode = null;
+                lastScanTime = 0;
+                onScanSuccess(testId, null);
+                input.value = ''; // Clear input after testing
+            } else {
+                alert("Please enter a Product ID to simulate a scan.");
+            }
+        }
     </script>
 </body>
 
