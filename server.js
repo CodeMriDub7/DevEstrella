@@ -1,10 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Serve static HTML/CSS/JS files from the current directory
+app.use(express.static(__dirname));
 
 const SECRET_KEY = 'super_secret_guard_key_2026'; // In production, this goes in .env
 

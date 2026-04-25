@@ -383,6 +383,7 @@
             <h2>Scan Product</h2>
             <div id="reader"></div>
             <div id="scan-feedback">Scan feedback will appear here</div>
+            <button id="resumeScanBtn" onclick="resumeScanner()" style="display: none; width: 100%; margin-top: 1rem; padding: 0.75rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif;">Scan Next Item</button>
             
             <!-- Developer Testing Option -->
             <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #334155;">
@@ -610,7 +611,7 @@
                     
                     // 2. Register bill with local Node.js server to get Secure Token
                     try {
-                        const res = await fetch('http://localhost:3000/api/bills', {
+                        const res = await fetch('/api/bills', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ items: cart })
@@ -707,6 +708,9 @@
                 return;
             }
 
+            // PAUSE SCANNER IMMEDIATELY
+            try { html5QrcodeScanner.pause(true); } catch(e) {}
+
             lastScannedCode = decodedText;
             lastScanTime = now;
 
@@ -738,6 +742,16 @@
                 console.error("Error fetching product:", err);
                 showFeedback(`Error connecting to database.`, 'error');
             }
+
+            // Show Resume Button
+            document.getElementById('resumeScanBtn').style.display = 'block';
+        }
+
+        function resumeScanner() {
+            try { html5QrcodeScanner.resume(); } catch(e) {}
+            document.getElementById('resumeScanBtn').style.display = 'none';
+            document.getElementById('scan-feedback').style.opacity = 0;
+            lastScannedCode = null; // allow scanning same item again
         }
 
         function onScanFailure(error) {

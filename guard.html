@@ -126,7 +126,7 @@
             statusBox.style.display = 'block';
 
             try {
-                const res = await fetch(`http://localhost:3000/api/verify/${token}`);
+                const res = await fetch(`/api/verify/${token}`);
                 const data = await res.json();
 
                 if (res.ok && data.success) {
@@ -145,6 +145,7 @@
                         <h2>✅ VERIFIED - CLEAR TO GO</h2>
                         <p>${data.message}</p>
                         ${itemsHtml}
+                        <button onclick="resumeScanner()" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif;">Scan Next Bill</button>
                     `;
                 } else {
                     // FLAGGED RED
@@ -153,6 +154,7 @@
                         <h2>❌ FLAGGED</h2>
                         <p>${data.message}</p>
                         <p style="margin-top:1rem; font-weight:bold;">DO NOT LET CUSTOMER PASS.</p>
+                        <button onclick="resumeScanner()" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #ef4444; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif;">Scan Next Bill</button>
                     `;
                 }
             } catch (err) {
@@ -161,6 +163,7 @@
                     <h2>⚠️ SYSTEM ERROR</h2>
                     <p>Could not connect to Security Server.</p>
                     <p style="font-size:0.8rem; color:#94a3b8;">Ensure Node.js backend is running on port 3000.</p>
+                    <button onclick="resumeScanner()" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #ef4444; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif;">Scan Next Bill</button>
                 `;
             }
         }
@@ -170,12 +173,21 @@
             // Prevent double scans
             if (decodedText === lastScannedCode && (now - lastScanTime) < 3000) return;
             
+            // PAUSE SCANNER
+            try { html5QrcodeScanner.pause(true); } catch(e) {}
+
             lastScannedCode = decodedText;
             lastScanTime = now;
             
             if (navigator.vibrate) navigator.vibrate(200);
             
             await verifyToken(decodedText);
+        }
+
+        function resumeScanner() {
+            try { html5QrcodeScanner.resume(); } catch(e) {}
+            document.getElementById('statusResult').style.display = 'none';
+            lastScannedCode = null;
         }
 
         function onScanFailure(error) {
