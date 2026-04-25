@@ -298,7 +298,7 @@
             <div id="cart-items-container" style="flex: 1; overflow-y: auto; max-height: 400px; padding-right: 5px;">
                 <!-- Cart items injected here -->
             </div>
-            
+
             <div class="cart-total-section">
                 <span>Total:</span>
                 <span id="cart-total">$0.00</span>
@@ -354,7 +354,7 @@
         function updateQuantity(id, delta) {
             let cart = getCart();
             const item = cart.find(i => i.id === id);
-            
+
             if (item) {
                 item.quantity += delta;
                 if (item.quantity <= 0) {
@@ -374,7 +374,7 @@
         // Clear cart
         function checkout() {
             const cart = getCart();
-            if(cart.length === 0) {
+            if (cart.length === 0) {
                 alert("Your cart is empty!");
                 return;
             }
@@ -388,7 +388,7 @@
             const cart = getCart();
             const container = document.getElementById('cart-items-container');
             const totalEl = document.getElementById('cart-total');
-            
+
             container.innerHTML = '';
             let total = 0;
 
@@ -441,7 +441,7 @@
             const now = Date.now();
             // Prevent double scans within 2 seconds for the same item
             if (decodedText === lastScannedCode && (now - lastScanTime) < 2000) {
-                return; 
+                return;
             }
 
             lastScannedCode = decodedText;
@@ -467,13 +467,13 @@
         // Initialize Scanner & Cart using the robust settings
         let html5QrcodeScanner = new Html5QrcodeScanner(
             "reader",
-            { 
+            {
                 fps: 10,
-                formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+                formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
             },
             /* verbose= */ false
         );
-            
+
         html5QrcodeScanner.render(onScanSuccess, onScanFailure);
         renderCart();
     </script>
